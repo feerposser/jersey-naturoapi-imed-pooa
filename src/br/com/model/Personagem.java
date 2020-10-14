@@ -4,18 +4,28 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Personagem {
-
-	private int anoNascimento;
+	
+	private int id;
 	private String nome;
+	private int anoNascimento;
 	private String clan;
 	
-	public Personagem(int anoNascimento, String nome, String clan) {
+	public Personagem(int id, String nome,  int anoNascimento, String clan) {
 		this.anoNascimento = anoNascimento;
 		this.nome = nome;
-		this.clan = clan;	
+		this.clan = clan;
+		this.id = id;
 	}
 	
 	public Personagem() {}
+	
+	public int getId() {
+		return this.id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public int getAnoNascimento() {
 		return anoNascimento;

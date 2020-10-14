@@ -1,6 +1,6 @@
 package br.com.rest;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -13,21 +13,24 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import br.com.dao.PersonagemDAO;
 import br.com.model.Personagem;
 
 @Path("/personagem")
 public class PersonagemREST {
 
+	PersonagemDAO pDAO = null;
+
+	public PersonagemREST() {
+		this.pDAO = new PersonagemDAO();
+	}
+
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getPersonagens() {
-		Personagem personagem = new Personagem(2020, "Narutooo", "Uzumaki");
-		ArrayList<Personagem> personagens = new ArrayList();
-		personagens.add(personagem);
-		personagens.add(personagem);
+	public Response getPersonagens() throws SQLException {
 
-		return Response.ok(personagens).build();
+		return Response.ok(pDAO.findAll()).build();
 	}
 
 	@GET
@@ -35,14 +38,7 @@ public class PersonagemREST {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getPersonagem(@PathParam("id") int id) {
-		ArrayList<Personagem> personagens = new ArrayList();
-
-		Personagem naruto = new Personagem(2020, "Narutooo", "Uzumaki");
-		personagens.add(naruto);
-		Personagem sasuke = new Personagem(2021, "Sasuke", "Uchiha");
-		personagens.add(sasuke);
-
-		return Response.ok(personagens.get(id)).build();
+		return Response.ok(pDAO.findById(id)).build();
 	}
 
 	@POST
@@ -50,14 +46,35 @@ public class PersonagemREST {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response addPersonagem(Personagem personagem) {
 		try {
-			ArrayList<Personagem> personagens = new ArrayList();
 
-			Personagem naruto = new Personagem(2020, "Narutooo", "Uzumaki");
-			personagens.add(naruto);
+			boolean result = pDAO.insert(personagem);
 
-			personagens.add(personagem);
+			if (result) {
+				return Response.status(Response.Status.CREATED).entity(personagem).build();
+			} else {
+				return Response.status(Response.Status.NOT_MODIFIED).entity(personagem).build();
+			}
 
-			return Response.status(Response.Status.CREATED).entity(personagem).build();
+		} catch (Exception e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+	}
+
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response atualizaPersonagem(Personagem personagem) {
+
+		try {
+
+			boolean result = pDAO.update(personagem);
+
+			if (result) {
+				return Response.status(Response.Status.CREATED).entity(personagem).build();
+			} else {
+				return Response.status(Response.Status.NOT_MODIFIED).entity(personagem).build();
+			}
+
 		} catch (Exception e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
@@ -70,24 +87,16 @@ public class PersonagemREST {
 	public Response deletaPersonagem(@PathParam("id") int id) {
 
 		try {
-			ArrayList<Personagem> personagens = new ArrayList();
 
-			Personagem naruto = new Personagem(2020, "Narutooo", "Uzumaki");
-			personagens.add(naruto);
-			Personagem sasuke = new Personagem(2021, "Sasuke", "Uchiha");
-			personagens.add(sasuke);
-			
-			personagens.remove(id);
-			
-			for (Personagem p: personagens) {
-				System.out.println("->> " + p.getNome());
+			boolean result = pDAO.delete(id);
+			if (result) {
+				return Response.status(Response.Status.OK).build();
+			} else {
+				return Response.status(Response.Status.NOT_MODIFIED).build();
 			}
-
-			return Response.status(Response.Status.OK).build();
 		} catch (Exception e) {
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
-
 	}
 
 }
